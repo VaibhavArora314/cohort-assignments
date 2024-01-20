@@ -16,6 +16,57 @@
   Once you've implemented the logic, test your code by running
 */
 
-class Calculator {}
+class Calculator {
+  constructor() {
+    this.result = 0;
+  }
+
+  add(num) {
+    if (typeof num == "number")
+      this.result += num;
+    else
+      throw new Error("Invalid number");
+  }
+
+  subtract(num) {
+    if (typeof num == "number")
+      this.result -= num;
+    else
+      throw new Error("Invalid number");
+  }
+
+  multiply(num) {
+    if (typeof num == "number")
+      this.result *= num;
+    else
+      throw new Error("Invalid number");
+  }
+
+  divide(num) {
+    if (typeof num == "number" && num != 0)
+      this.result /= num;
+    else
+      throw new Error("Invalid number");
+  }
+
+  clear() {
+    this.result = 0;
+  }
+
+  getResult() {
+    return this.result;
+  }
+
+  calculate(exp) {
+    try {
+      const val = eval(exp.replace(/\s+/g, " "));
+
+      if (val == Infinity) throw new Error("Invalid expression!");
+      this.result = val;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
 
 module.exports = Calculator;
