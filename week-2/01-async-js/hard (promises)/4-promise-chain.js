@@ -24,15 +24,22 @@ function wait3(t) {
 }
 
 function calculateTime(t1, t2, t3) {
-    const previousDate = new Date();
-    const previousMs = previousDate.getTime();
+  const previousDate = new Date();
+  const previousMs = previousDate.getTime();
 
-    return wait1(t1).then(() => {return wait2(t2);}).then(() => {return wait3(t3);}).then(() => {
-        const currentDate = new Date();
-    const currentMs = currentDate.getTime();
-
-    return currentMs - previousMs;
+  return wait1(t1)
+    .then(() => {
+      return wait2(t2);
     })
+    .then(() => {
+      return wait3(t3);
+    })
+    .then(() => {
+      const currentDate = new Date();
+      const currentMs = currentDate.getTime();
+
+      return currentMs - previousMs;
+    });
 }
 
 module.exports = calculateTime;

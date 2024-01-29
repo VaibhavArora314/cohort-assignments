@@ -39,11 +39,107 @@
 
   Testing the server - run `npm run test-todoServer` command in terminal
  */
-  const express = require('express');
-  const bodyParser = require('body-parser');
-  
-  const app = express();
-  
-  app.use(bodyParser.json());
-  
-  module.exports = app;
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+
+const readTodos = () => {
+  return new Promise((resolve) => {
+    fs.readFile("todos.json", "utf-8", (err, data) => {
+      resolve(JSON.parse(data));
+    });
+  });
+};
+
+const writeTodos = (data) => {
+  return new Promise((resolve) => {
+    fs.writeFile("todos.json", data, (err) => {
+      resolve(true);
+    });
+  });
+};
+
+const app = express();
+
+app.use(bodyParser.json());
+
+app.get("/todos", async (req, res) => {
+  const todos = await readTodos();
+  res.json(todos);
+});
+
+app.get("/todos/:id", async (req, res) => {
+  const id = req.params.id;
+  const todos = await readTodos();
+
+  let todoFound = false;
+  todos.forEach((todo) => {
+    if (todo.id == id) {
+      todoFound = true;
+      res.send(todo);
+    }
+  });
+
+  if (!todoFound) res.status(404).send("No such todo!");
+});
+
+app.post("/todos", async (req, res) => {
+  const newTodo = req.body;
+  newTodo.id = new Date().getTime().toString(36);
+
+  const todos = await readTodos();
+
+  todos.push(newTodo);
+
+  await writeTodos(JSON.stringify(todos));
+  res.status(201).json({
+    id: newTodo.id,
+  });
+});
+
+app.put("/todos/:id", async (req, res) => {
+  const id = req.params.id,
+    body = req.body;
+
+  const todos = await readTodos();
+
+  let todoFound = false,
+    updatedTodo = null;
+  const updateTodos = todos.map((todo) => {
+    if (todo.id == id) {
+      todo.title = body.title;
+      todo.completed = body.completed;
+      todoFound = true;
+      updatedTodo = todo;
+    }
+    return todo;
+  });
+
+  if (todoFound) {
+    await writeTodos(JSON.stringify(updateTodos));
+    res.status(200).json(updatedTodo);
+  } else res.status(404).send("Todo not found");
+});
+
+app.delete("/todos/:id", async (req, res) => {
+  const id = req.params.id;
+  const todos = await readTodos();
+
+  let todoFound = false;
+  const updateTodos = todos.filter((todo) => {
+    if (todo.id == id) {
+      todoFound = true;
+      return false;
+    }
+    return true;
+  });
+
+  if (todoFound) {
+    await writeTodos(JSON.stringify(updateTodos));
+    res.status(200).send("Todo deleted");
+  } else res.status(404).send("Todo not found");
+});
+
+// app.listen(3000);
+
+module.exports = app;
