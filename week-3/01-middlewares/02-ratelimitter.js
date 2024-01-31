@@ -16,6 +16,22 @@ setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
 
+const rateLimiter = (req,res,next) => {
+  if (typeof numberOfRequestsForUser[req.header["user-id"]] == "number" && numberOfRequestsForUser[req.header["user-id"]] == 5) {
+    res.status(404).json({
+      msg: "Only allowed 5 requests per second!"
+    })
+    return;
+  }
+
+  if (typeof numberOfRequestsForUser[req.header["user-id"]] != "number") 
+    numberOfRequestsForUser[req.header["user-id"]] = 0;
+  numberOfRequestsForUser[req.header["user-id"]]++;
+  next();
+}
+
+app.use(rateLimiter);
+
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
 });

@@ -23,4 +23,13 @@ app.get('/errorCount', function(req, res) {
   res.status(200).json({ errorCount });
 });
 
+const globalCatch = (err,req,res,next) => {
+  errorCount++;
+  res.status(404).json({
+    msg: "An error occurred!"
+  });
+}
+
+app.use(globalCatch);
+
 module.exports = app;
