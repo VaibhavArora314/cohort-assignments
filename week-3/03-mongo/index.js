@@ -7,9 +7,16 @@ const userRouter = require("./routes/user");
 // Middleware for parsing request bodies
 app.use(bodyParser.json());
 app.use("/admin", adminRouter)
-app.use("/user", userRouter)
+app.use("/users", userRouter)
 
 const PORT = 3000;
+
+app.use((err,req,res,next) => {
+    console.log(err.message);
+    res.status(500).json({
+        message: "Internal Server Error"
+    })
+})
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
