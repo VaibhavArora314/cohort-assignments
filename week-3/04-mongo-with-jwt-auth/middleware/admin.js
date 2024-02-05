@@ -1,7 +1,36 @@
 // Middleware for handling auth
+
+const { verifyJWT, decodeJWT } = require("../helpers");
+const { Admin } = require("../db");
+
 function adminMiddleware(req, res, next) {
-    // Implement admin auth logic
-    // You need to check the headers and validate the admin from the admin DB. Check readme for the exact headers to be expected
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(403).json({
+      message: "Invalid format!",
+    });
+  }
+
+  const token = authHeader.slice(7);
+  if (!verifyJWT(token)) {
+    return res.status(403).json({
+      message: "Invalid token!",
+    });
+  }
+
+  const payload = decodeJWT(token);
+  const username = payload.username;
+
+  const adminUser = Admin.findOne({ username });
+  if (!adminUser) {
+    return res.status(403).json({
+      message: "No valid user exists!",
+    });
+  }
+  req.body.username = username;
+  
+  next();
 }
 
 module.exports = adminMiddleware;
